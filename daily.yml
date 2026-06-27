@@ -1,0 +1,32 @@
+name: MotiveAF daily post
+
+on:
+  schedule:
+    # 13:00 UTC = 8:00 AM US Central (CDT, summer). Adjust if needed.
+    - cron: "0 13 * * *"
+  workflow_dispatch:        # lets you run it by hand from the Actions tab
+    inputs:
+      run_date:
+        description: "Force a date (YYYY-MM-DD), blank = today"
+        required: false
+      dry_run:
+        description: "Set to 1 to test without posting"
+        required: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Post today's MotiveAF meme
+        env:
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+          FB_PAGE_ID:    ${{ secrets.FB_PAGE_ID }}
+          IG_USER_ID:    ${{ secrets.IG_USER_ID }}
+          IMG_BASE_URL:  ${{ secrets.IMG_BASE_URL }}
+          RUN_DATE:      ${{ github.event.inputs.run_date }}
+          DRY_RUN:       ${{ github.event.inputs.dry_run }}
+        run: python post_today.py
